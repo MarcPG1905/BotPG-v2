@@ -1,4 +1,4 @@
-package org.pegos.moderation_commands;
+package org.pegos.moderation;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.Channel;
@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class SlashClear extends ListenerAdapter {
-
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (!event.getName().equals("clear")) return;
