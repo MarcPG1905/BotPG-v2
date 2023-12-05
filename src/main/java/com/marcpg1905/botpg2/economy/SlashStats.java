@@ -1,11 +1,11 @@
-package org.pegos.economy;
+package com.marcpg1905.botpg2.economy;
 
+import com.marcpg1905.botpg2.UserStuff;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.pegos.UserStuff;
 
 import java.awt.*;
 

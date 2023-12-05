@@ -1,4 +1,4 @@
-package org.pegos.commands;
+package com.marcpg1905.botpg2.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;

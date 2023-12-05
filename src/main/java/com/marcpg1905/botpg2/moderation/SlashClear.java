@@ -1,4 +1,4 @@
-package org.pegos.moderation;
+package com.marcpg1905.botpg2.moderation;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.Channel;

@@ -1,14 +1,13 @@
-package org.pegos;
+package com.marcpg1905.botpg2;
 
+import com.marcpg1905.botpg2.commands.SlashSocials;
+import com.marcpg1905.botpg2.economy.FileManagementCommands;
+import com.marcpg1905.botpg2.economy.MessageEvent;
+import com.marcpg1905.botpg2.moderation.SlashClear;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
-import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
-import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -17,13 +16,9 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.jetbrains.annotations.NotNull;
-import org.pegos.commands.SlashAvatar;
-import org.pegos.commands.SlashSocials;
-import org.pegos.commands.SlashSource;
-import org.pegos.economy.MessageEvent;
-import org.pegos.economy.FileManagementCommands;
-import org.pegos.economy.SlashStats;
-import org.pegos.moderation.SlashClear;
+import com.marcpg1905.botpg2.commands.SlashAvatar;
+import com.marcpg1905.botpg2.commands.SlashSource;
+import com.marcpg1905.botpg2.economy.SlashStats;
 
 import java.io.IOException;
 import java.nio.file.Files;

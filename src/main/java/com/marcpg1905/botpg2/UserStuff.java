@@ -1,4 +1,4 @@
-package org.pegos;
+package com.marcpg1905.botpg2;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
