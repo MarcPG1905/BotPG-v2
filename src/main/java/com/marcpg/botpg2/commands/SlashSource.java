@@ -1,4 +1,4 @@
-package com.marcpg1905.botpg2.commands;
+package com.marcpg.botpg2.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;

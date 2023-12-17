@@ -1,5 +1,6 @@
-package com.marcpg1905.botpg2.commands;
+package com.marcpg.botpg2.commands;
 
+import me.marcpg1905.util.Formatter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -46,7 +47,7 @@ public class SlashAvatar extends ListenerAdapter {
         if (newString.isBlank() || newString.isEmpty()) {
 			return "None";
 		} else {
-			return newString;
+			return Formatter.toPascalCase(newString);
 		}
 	}
 }

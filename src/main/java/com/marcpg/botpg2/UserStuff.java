@@ -1,4 +1,4 @@
-package com.marcpg1905.botpg2;
+package com.marcpg.botpg2;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -134,8 +134,6 @@ public class UserStuff {
         }
 
         public void sentMessage(@NotNull Message message) {
-            System.out.println("UserData.sentMessage(" + "message = " + message + ")");
-
             messagesSent++;
 
             if (!message.isFromGuild() || user.isBot() || user.isSystem() || message.isWebhookMessage()) return;
@@ -165,8 +163,6 @@ public class UserStuff {
         }
 
         public void addXP(int amount, Message message) {
-            System.out.println("UserData.addXP(" + "amount = " + amount + ", message = " + message + ")");
-
             totalXP += amount;
             levelXP += amount;
 
@@ -208,7 +204,7 @@ public class UserStuff {
             public UserData deserialize(@NotNull JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
                 JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
-                User user = BotPG.jda.getUserById(node.get("userId").asLong());
+                User user = BotPGv2.jda.getUserById(node.get("userId").asLong());
                 int messagesSent = node.get("messagesSent").asInt();
                 int level = node.get("level").asInt();
                 int levelXP = node.get("levelXP").asInt();

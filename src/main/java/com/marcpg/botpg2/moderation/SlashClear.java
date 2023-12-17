@@ -1,4 +1,4 @@
-package com.marcpg1905.botpg2.moderation;
+package com.marcpg.botpg2.moderation;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.Channel;

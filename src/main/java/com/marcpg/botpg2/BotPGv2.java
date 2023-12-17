@@ -1,9 +1,10 @@
-package com.marcpg1905.botpg2;
+package com.marcpg.botpg2;
 
-import com.marcpg1905.botpg2.commands.SlashSocials;
-import com.marcpg1905.botpg2.economy.FileManagementCommands;
-import com.marcpg1905.botpg2.economy.MessageEvent;
-import com.marcpg1905.botpg2.moderation.SlashClear;
+import com.marcpg.botpg2.commands.SlashSocials;
+import com.marcpg.botpg2.economy.FileManagementCommands;
+import com.marcpg.botpg2.economy.MessageEvent;
+import com.marcpg.botpg2.moderation.SlashClear;
+import me.marcpg1905.color.Ansi;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;
@@ -16,22 +17,26 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.jetbrains.annotations.NotNull;
-import com.marcpg1905.botpg2.commands.SlashAvatar;
-import com.marcpg1905.botpg2.commands.SlashSource;
-import com.marcpg1905.botpg2.economy.SlashStats;
+import com.marcpg.botpg2.commands.SlashAvatar;
+import com.marcpg.botpg2.commands.SlashSource;
+import com.marcpg.botpg2.economy.SlashStats;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-public class BotPG extends ListenerAdapter {
+public class BotPGv2 extends ListenerAdapter {
     public static Guild pegosGuild;
     public static JDA jda;
 
     public static void main(String[] args) throws InterruptedException, IOException {
-        String token = Files.readAllLines(Paths.get("token")).get(0);
-        System.out.println("Using token: " + token);
+        String token = Files.readAllLines(Paths.get("token")).getFirst();
+        System.out.println(Ansi.formattedString("Using token: " + token, Ansi.BRIGHT_BLUE));
+
+        System.out.println(Ansi.formattedString("Allocated RAM: " + Runtime.getRuntime().maxMemory() + " bytes", Ansi.BRIGHT_BLUE));
+        System.out.println(Ansi.formattedString("Available Processors: " + Runtime.getRuntime().availableProcessors() + " bytes", Ansi.BRIGHT_BLUE));
+        System.out.println(Ansi.formattedString("Operating System: " + System.getProperty("os.name") + " bytes", Ansi.BRIGHT_BLUE));
 
         jda = JDABuilder.createDefault(token, GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS)
                 .addEventListeners(
@@ -42,12 +47,14 @@ public class BotPG extends ListenerAdapter {
                         new SlashClear(),
                         new SlashAvatar(),
                         new MessageEvent(),
-                        new BotPG()
+                        new BotPGv2()
                 )
                 .build()
                 .awaitReady();
+        System.out.println(Ansi.formattedString("Created the JDA instance!", Ansi.GREEN));
 
         pegosGuild = Objects.requireNonNull(jda.getGuildById(1140673234262564975L));
+        System.out.println(Ansi.formattedString("Initialized the PegOS Guild!", Ansi.GREEN));
 
         pegosGuild.updateCommands().addCommands(
                 Commands.slash("stats", "Gives information about your stats, like your level and XP."),
@@ -62,6 +69,7 @@ public class BotPG extends ListenerAdapter {
                         .addOption(OptionType.INTEGER, "count", "How many messages to clear")
                         .addOption(OptionType.CHANNEL, "channel", "What channel to clear.", false)
         ).queue();
+        System.out.println(Ansi.formattedString("Updated commands on the PegOS Guild!", Ansi.GREEN));
     }
 
     @Override
