@@ -4,7 +4,7 @@ import com.marcpg.botpg2.commands.SlashSocials;
 import com.marcpg.botpg2.economy.FileManagementCommands;
 import com.marcpg.botpg2.economy.MessageEvent;
 import com.marcpg.botpg2.moderation.SlashClear;
-import me.marcpg1905.color.Ansi;
+import com.marcpg.color.Ansi;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;

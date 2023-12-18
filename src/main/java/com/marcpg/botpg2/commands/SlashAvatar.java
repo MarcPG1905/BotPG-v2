@@ -1,6 +1,6 @@
 package com.marcpg.botpg2.commands;
 
-import me.marcpg1905.util.Formatter;
+import com.marcpg.text.Formatter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
