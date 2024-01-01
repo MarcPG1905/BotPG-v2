@@ -1,6 +1,5 @@
 ### Bot Token ###
-token
-data.json
+pg.properties
 
 ### User-specific stuff ###
 .idea/

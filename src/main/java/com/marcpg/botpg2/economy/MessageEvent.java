@@ -1,7 +1,7 @@
 package com.marcpg.botpg2.economy;
 
 import com.marcpg.botpg2.UserStuff;
-import net.dv8tion.jda.api.entities.Member;
+import com.marcpg.data.time.Time;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -15,11 +15,10 @@ public class MessageEvent extends ListenerAdapter {
         System.out.println(event.getAuthor().getEffectiveName() + " send a message!");
 
         User user = event.getAuthor();
-        Member member = event.getMember();
 
-        if (UserStuff.USERDATA.get(user.getIdLong()) == null) {
+        if (!UserStuff.USERDATA.containsKey(user.getIdLong())) {
             int xp = new Random().nextInt(10, 20);
-            UserStuff.USERDATA.put(user.getIdLong(), new UserStuff.UserData(user, 1, 0, xp, xp, event.getMessage(), (member != null && member.isBoosting()), false, UserStuff.UserFlag.NONE));
+            UserStuff.USERDATA.put(user.getIdLong(), new UserStuff.UserData(user, 1, 0, xp, xp, event.getMessage(), false, UserStuff.UserFlag.NONE, new Time(0), 0));
         }
 
         UserStuff.UserData data = UserStuff.USERDATA.get(user.getIdLong());

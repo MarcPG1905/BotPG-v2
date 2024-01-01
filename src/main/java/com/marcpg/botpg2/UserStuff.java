@@ -1,11 +1,6 @@
 package com.marcpg.botpg2;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.marcpg.color.Ansi;
 import com.marcpg.data.time.Time;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -13,13 +8,17 @@ import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+@SuppressWarnings("unused")
 public class UserStuff {
     public static final HashMap<Long, UserData> USERDATA = new HashMap<>();
     public static final Random RANDOM = new Random();
@@ -45,10 +44,9 @@ public class UserStuff {
         private int levelXP;
         private int totalXP;
         private Message lastMessage;
-        private boolean booster;
         private boolean donator;
         private UserFlag flag;
-        private Time voiceChatTime;
+        private final Time voiceChatTime;
         private int invitations;
 
         public int messagesSent() {
@@ -86,13 +84,6 @@ public class UserStuff {
             this.lastMessage = lastMessage;
         }
 
-        public boolean booster() {
-            return booster;
-        }
-        public void booster(boolean booster) {
-            this.booster = booster;
-        }
-
         public boolean donator() {
             return donator;
         }
@@ -110,7 +101,7 @@ public class UserStuff {
         public Time voiceChatTime() {
             return voiceChatTime;
         }
-        public void addVoiceChatTime(Time voiceChatTime) {
+        public void addVoiceChatTime(@NotNull Time voiceChatTime) {
             this.voiceChatTime.increment(voiceChatTime.getAs(Time.Unit.SECONDS));
         }
 
@@ -121,16 +112,17 @@ public class UserStuff {
             this.invitations = invitations;
         }
 
-        public UserData(User user, int messagesSent, int level, int levelXP, int totalXP, Message lastMessage, boolean booster, boolean donator, UserFlag flag) {
+        public UserData(User user, int messagesSent, int level, int levelXP, int totalXP, Message lastMessage, boolean donator, UserFlag flag, Time voiceChatTime, int invitations) {
             this.user = user;
             this.messagesSent = messagesSent;
             this.level = level;
             this.levelXP = levelXP;
             this.totalXP = totalXP;
             this.lastMessage = lastMessage;
-            this.booster = booster;
             this.donator = donator;
             this.flag = flag;
+            this.voiceChatTime = voiceChatTime;
+            this.invitations = invitations;
         }
 
         public void sentMessage(@NotNull Message message) {
@@ -180,42 +172,6 @@ public class UserStuff {
                 }
             }
         }
-
-        public static class UserDataSerializer extends JsonSerializer<UserData> {
-            @Override
-            public void serialize(@NotNull UserData userData, @NotNull JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-                jsonGenerator.writeStartObject();
-
-                jsonGenerator.writeNumberField("userId", userData.user.getIdLong());
-                jsonGenerator.writeNumberField("messagesSent", userData.messagesSent);
-                jsonGenerator.writeNumberField("level", userData.level);
-                jsonGenerator.writeNumberField("levelXP", userData.levelXP);
-                jsonGenerator.writeNumberField("totalXP", userData.totalXP);
-                jsonGenerator.writeBooleanField("booster", userData.booster);
-                jsonGenerator.writeBooleanField("donator", userData.donator);
-                jsonGenerator.writeStringField("flag", userData.flag.name());
-
-                jsonGenerator.writeEndObject();
-            }
-        }
-
-        public static class UserDataDeserializer extends JsonDeserializer<UserData> {
-            @Override
-            public UserData deserialize(@NotNull JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
-                JsonNode node = jsonParser.getCodec().readTree(jsonParser);
-
-                User user = BotPGv2.jda.getUserById(node.get("userId").asLong());
-                int messagesSent = node.get("messagesSent").asInt();
-                int level = node.get("level").asInt();
-                int levelXP = node.get("levelXP").asInt();
-                int totalXP = node.get("totalXP").asInt();
-                boolean booster = node.get("booster").asBoolean();
-                boolean donator = node.get("donator").asBoolean();
-                UserFlag flag = UserFlag.valueOf(node.get("flag").asText());
-
-                return new UserData(user, messagesSent, level, levelXP, totalXP, null, booster, donator, flag);
-            }
-        }
     }
 
     public static final double l = 19000, k = 0.019, c = 46.5;
@@ -224,26 +180,47 @@ public class UserStuff {
         return (int) (l / (c * Math.pow(Math.E, (-k * level)) + 1));
     }
 
-    public static void save() throws IOException {
-        File dataFile = new File("data.json");
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(UserData.class, new UserData.UserDataSerializer());
-        mapper.registerModule(module);
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-        mapper.writeValue(dataFile, USERDATA);
+    public static void save() {
+        try (BufferedWriter writer = Files.newBufferedWriter(new File("userdata").toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+            for (UserData d : USERDATA.values()) {
+                List<String> list = List.of(
+                        d.user.getId(),
+                        String.valueOf(d.messagesSent),
+                        String.valueOf(d.level),
+                        String.valueOf(d.levelXP),
+                        String.valueOf(d.totalXP),
+                        d.flag.name(),
+                        String.valueOf(d.voiceChatTime.get()),
+                        String.valueOf(d.invitations)
+                );
+                writer.write(String.join(", ", list));
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println(Ansi.formattedString("Couldn't write all user data to `userdata` file!", Ansi.RED));
+        }
     }
 
-    public static void load() throws IOException {
-        File dataFile = new File("data.json");
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(UserData.class, new UserData.UserDataDeserializer());
-        mapper.registerModule(module);
-
-        USERDATA.clear();
-        TypeReference<HashMap<Long, UserData>> typeReference = new TypeReference<>() {};
-        USERDATA.putAll(mapper.readValue(dataFile, typeReference));
+    public static void load() {
+        try {
+            USERDATA.clear();
+            for (String line : Files.readAllLines(new File("userdata").toPath())) {
+                String[] values = line.split(", ");
+                USERDATA.put(Long.parseLong(values[0]), new UserData(
+                        BotPGv2.JDA.retrieveUserById(values[0]).complete(),
+                        Integer.parseInt(values[1]),
+                        Integer.parseInt(values[2]),
+                        Integer.parseInt(values[3]),
+                        Integer.parseInt(values[4]),
+                        null,
+                        false,
+                        UserFlag.valueOf(values[5]),
+                        new Time(Long.parseLong(values[6])),
+                        Integer.parseInt(values[7])
+                ));
+            }
+        } catch (IOException e) {
+            System.err.println(Ansi.formattedString("Couldn't read all user data from `userdata` file!", Ansi.RED));
+        }
     }
 }
