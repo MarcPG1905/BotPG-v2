@@ -18,19 +18,9 @@ public class MessageEvent extends ListenerAdapter {
 
         if (!UserStuff.USERDATA.containsKey(user.getIdLong())) {
             int xp = new Random().nextInt(10, 20);
-            UserStuff.USERDATA.put(user.getIdLong(), new UserStuff.UserData(user, 1, 0, xp, xp, event.getMessage(), false, UserStuff.UserFlag.NONE, new Time(0), 0));
+            UserStuff.USERDATA.put(user.getIdLong(), new UserStuff.UserData(user, 1, 0, xp, xp, event.getMessage(), new Time(0)));
         }
 
-        UserStuff.UserData data = UserStuff.USERDATA.get(user.getIdLong());
-
-        if (data.flag().rank >= UserStuff.UserFlag.LIMITED_ACCESS.rank) {
-            event.getMessage().delete().queue();
-            if (user.hasPrivateChannel()) {
-                user.openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("You have limited access due to breaking rules right now!")).queue();
-            }
-            return;
-        }
-
-        data.sentMessage(event.getMessage());
+        UserStuff.USERDATA.get(user.getIdLong()).sentMessage(event.getMessage());
     }
 }

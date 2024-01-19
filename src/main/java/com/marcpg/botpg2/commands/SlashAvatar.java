@@ -24,7 +24,7 @@ public class SlashAvatar extends ListenerAdapter {
         EmbedBuilder embed = new EmbedBuilder()
 				.setColor(Color.decode("#FFFFFF"))
 				.setTitle(target.getUser().getName() + "'s User Profile")
-				.setImage(target.getAvatarUrl())
+				.setImage(target.getEffectiveAvatarUrl())
 				.addField("User ID", "`" + target.getId() + "`", true)
 				.addField("Account Creation", "<t:" + target.getTimeCreated().toEpochSecond() + ">", true)
 				.setColor(target.getColor())

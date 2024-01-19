@@ -39,9 +39,7 @@ public class SlashStats extends ListenerAdapter {
                 .addField("Level XP", String.valueOf(data.levelXP()), true)
                 .addField("Total XP", String.valueOf(data.totalXP()), true)
                 .addField("Messages", String.valueOf(data.messagesSent()), true)
-                .addField("Boosting", member.isBoosting() ? "Yes" : "No", true)
-                .addField("Donator", data.donator() ? "Yes" : "No", true)
-                .addField("Flag", String.valueOf(data.flag()).toLowerCase(), true);
+                .addField("Boosting", member.isBoosting() ? "Yes" : "No", true);
 
         event.replyEmbeds(builder.build()).queue();
     }

@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.util.List;
@@ -18,7 +20,7 @@ public class SlashModUtil extends ListenerAdapter {
     public static final List<String> COMMANDS = List.of("kick", "ban", "pardon", "timeout", "un-timeout");
 
     @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (!COMMANDS.contains(event.getName())) return;
         if (!event.isFromGuild()) {
             event.reply("This command can only be used on servers!").setEphemeral(true).queue();
@@ -103,7 +105,7 @@ public class SlashModUtil extends ListenerAdapter {
                 event.reply("Successfully kicked " + mentionedMember.getEffectiveName() + "!").setEphemeral(true).queue();
             }
             case "ban" -> {
-                String deletionTime = Objects.requireNonNull(event.getOption("deletion-time")).getAsString();
+                OptionMapping deletionTime = event.getOption("deletion-time");
 
                 modChannel.sendMessageEmbeds(new EmbedBuilder()
                         .setTitle(member.getEffectiveName() + " banned " + mentionedMember.getEffectiveName())
@@ -123,7 +125,8 @@ public class SlashModUtil extends ListenerAdapter {
                     ).queue());
                 }
 
-                mentionedMember.ban((int) Time.parse(deletionTime).get(), TimeUnit.SECONDS).reason(reason).queue();
+                mentionedMember.ban(deletionTime == null ? 0 : (int) Time.parse(deletionTime.getAsString()).get(), TimeUnit.SECONDS).reason(reason).queue();
+
                 event.reply("Successfully banned " + mentionedMember.getEffectiveName() + "!").setEphemeral(true).queue();
             }
             case "timeout" -> {

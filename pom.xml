@@ -6,7 +6,7 @@
 
     <groupId>com.marcpg</groupId>
     <artifactId>BotPGv2</artifactId>
-    <version>0.2.3-BETA</version>
+    <version>0.3.0-BETA</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.18</version>
+            <version>5.0.0-beta.19</version>
         </dependency>
         <dependency>
             <groupId>com.marcpg</groupId>
