@@ -1,7 +1,6 @@
 package com.marcpg.botpg2.economy;
 
 import com.marcpg.botpg2.UserStuff;
-import com.marcpg.data.time.Time;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -16,11 +15,14 @@ public class MessageEvent extends ListenerAdapter {
 
         User user = event.getAuthor();
 
-        if (!UserStuff.USERDATA.containsKey(user.getIdLong())) {
+        if (!UserStuff.LAST_MESSAGES.containsKey(user.getIdLong()))
+            UserStuff.LAST_MESSAGES.put(user.getIdLong(), event.getMessage());
+
+        if (!UserStuff.DATABASE.contains(UserStuff.snowflakeToUuid(user.getIdLong()))) {
             int xp = new Random().nextInt(10, 20);
-            UserStuff.USERDATA.put(user.getIdLong(), new UserStuff.UserData(user, 1, 0, xp, xp, event.getMessage(), new Time(0)));
+            UserStuff.DATABASE.add(UserStuff.snowflakeToUuid(user.getIdLong()), 1, 0, xp, xp, 0);
         }
 
-        UserStuff.USERDATA.get(user.getIdLong()).sentMessage(event.getMessage());
+        UserStuff.sentMessage(UserStuff.snowflakeToUuid(user.getIdLong()), event.getMessage());
     }
 }

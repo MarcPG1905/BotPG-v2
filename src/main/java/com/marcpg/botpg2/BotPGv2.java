@@ -34,8 +34,8 @@ public class BotPGv2 extends ListenerAdapter {
             UserStuff.load();
             SlashWarn.load();
             System.out.println(Ansi.formattedString("Loaded user data and warnings!", Ansi.GREEN));
-        } catch (IOException e) {
-            System.err.println("Couldn't load the user data and warnings!");
+        } catch (SQLException | IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

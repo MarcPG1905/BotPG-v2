@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
+import java.util.Map;
 import java.util.Objects;
 
 public class SlashStats extends ListenerAdapter {
@@ -21,26 +22,24 @@ public class SlashStats extends ListenerAdapter {
             return;
         }
 
-        Member member = Objects.requireNonNull(event.getMember());
-
         OptionMapping option = event.getOption("user");
-        User user = option != null ? option.getAsUser() : event.getUser();
-        UserStuff.UserData data = UserStuff.USERDATA.get(user.getIdLong());
-        if (data == null) {
+        Member member = Objects.requireNonNull(option != null ? option.getAsMember() : event.getMember());
+
+        Map<String, Object> data = UserStuff.DATABASE.getRowMap(UserStuff.snowflakeToUuid(member.getIdLong()));
+        if (data.isEmpty()) {
             event.reply("You need to send at least one message to use this command!").setEphemeral(true).queue();
             return;
         }
 
         EmbedBuilder builder = new EmbedBuilder()
-                .setAuthor(user.getEffectiveName(), null, user.getEffectiveAvatarUrl())
+                .setAuthor(member.getEffectiveName(), null, member.getEffectiveAvatarUrl())
                 .setColor(Color.YELLOW)
-                .setTitle(user.getEffectiveName() + "'s Stats")
-                .addField("Level", String.valueOf(data.level()), true)
-                .addField("Level XP", String.valueOf(data.levelXP()), true)
-                .addField("Total XP", String.valueOf(data.totalXP()), true)
-                .addField("Messages", String.valueOf(data.messagesSent()), true)
+                .setTitle(member.getEffectiveName() + "'s Stats")
+                .addField("Level", String.valueOf(data.get("level")), true)
+                .addField("Level XP", String.valueOf(data.get("level_xp")), true)
+                .addField("Total XP", String.valueOf(data.get("total_xp")), true)
+                .addField("Messages", String.valueOf(data.get("messages_sent")), true)
                 .addField("Boosting", member.isBoosting() ? "Yes" : "No", true);
-
         event.replyEmbeds(builder.build()).queue();
     }
 }
