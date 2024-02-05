@@ -1,7 +1,6 @@
 package com.marcpg.botpg2.commands;
 
 import com.marcpg.botpg2.BotPGv2;
-import com.marcpg.botpg2.moderation.SlashWarn;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +15,6 @@ public class PrivateCommands extends ListenerAdapter {
             }
 
             event.reply("Shutting down and saving user data!").setEphemeral(true).queue();
-            SlashWarn.save();
             BotPGv2.JDA.shutdown();
         }
     }

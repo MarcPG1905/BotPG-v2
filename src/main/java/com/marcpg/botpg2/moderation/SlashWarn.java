@@ -1,6 +1,6 @@
 package com.marcpg.botpg2.moderation;
 
-import com.marcpg.color.Ansi;
+import com.marcpg.botpg2.UserStuff;
 import com.marcpg.data.time.Time;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -9,24 +9,17 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.postgresql.util.PGTimestamp;
 
 import java.awt.*;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
+import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class SlashWarn extends ListenerAdapter {
-    public static final List<Warn> WARNS = new ArrayList<>();
-
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getName().equals("warn")) {
@@ -40,11 +33,10 @@ public class SlashWarn extends ListenerAdapter {
             updateWarns(user);
 
             Date end = Date.from(Instant.ofEpochSecond(Instant.now().getEpochSecond() + Time.Unit.MONTHS.sec));
-            WARNS.add(new Warn(user.getId(), event.getUser().getId(), reason, level, end));
+            UserStuff.WARN_DATABASE.add(UUID.randomUUID(), UserStuff.snowflakeToUuid(user.getIdLong()), UserStuff.snowflakeToUuid(event.getUser().getIdLong()), reason, level, PGTimestamp.from(end.toInstant()));
 
-            int totalWarns = WARNS.stream()
-                    .filter(warn -> warn.userId.equals(user.getId()))
-                    .mapToInt(Warn::level)
+            int totalWarns = UserStuff.WARN_DATABASE.getRowArraysContaining(UserStuff.snowflakeToUuid(user.getIdLong()), "warned").stream()
+                    .mapToInt(row -> (Integer) row[4])
                     .sum();
 
             if (user.hasPrivateChannel()) {
@@ -93,22 +85,12 @@ public class SlashWarn extends ListenerAdapter {
         }
     }
 
-    public static void updateWarns(User user) {
-        WARNS.removeIf(warn -> warn.userId.equals(user.getId()) && new Date().after(warn.ends));
-    }
-
-    public static void load() throws IOException {
-        Files.readAllLines(new File("warns").toPath()).forEach(string -> WARNS.add(Warn.parse(string)));
-    }
-
-    public static void save() {
-        try (BufferedWriter writer = Files.newBufferedWriter(new File("userdata").toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
-            for (Warn warn : WARNS) {
-                writer.write(warn.format());
-                writer.newLine();
+    public static void updateWarns(@NotNull User user) {
+        Timestamp currentTime = Timestamp.from(Instant.now());
+        for (Object[] row : UserStuff.WARN_DATABASE.getRowArraysContaining(UserStuff.snowflakeToUuid(user.getIdLong()))) {
+            if (currentTime.after((PGTimestamp) row[5])) {
+                UserStuff.WARN_DATABASE.remove((UUID) row[0]);
             }
-        } catch (IOException e) {
-            System.err.println(Ansi.formattedString("Couldn't write all warns to the `warns` file!", Ansi.RED));
         }
     }
 

@@ -1,6 +1,5 @@
-package com.marcpg.botpg2.tickets;
+package com.marcpg.botpg2;
 
-import com.marcpg.botpg2.Config;
 import com.marcpg.text.Formatter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -25,8 +24,7 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class TicketCreation extends ListenerAdapter {
-
+public class Tickets extends ListenerAdapter {
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         if (event.getComponentId().equals("application-role")) {
@@ -83,8 +81,10 @@ public class TicketCreation extends ListenerAdapter {
                         .setDescription("This cannot be undone and scripts are currently not saved yet!")
                         .setColor(Color.RED);
                 event.replyEmbeds(builder.build())
-                        .addActionRow(Button.danger("confirm-delete-ticket", "Delete Ticket"))
-                        .addActionRow(Button.secondary("cancel-delete-ticket", "Cancel"))
+                        .addActionRow(
+                                Button.danger("confirm-delete-ticket", "Delete Ticket"),
+                                Button.secondary("cancel-delete-ticket", "Cancel")
+                        )
                         .setEphemeral(true)
                         .queue();
             }
@@ -116,10 +116,11 @@ public class TicketCreation extends ListenerAdapter {
                     .addField("Experience", event.getValue("experience").getAsString(), false)
                     .addField("Why you?", event.getValue("why").getAsString(), false);
 
-            createTicket(guild, role, event.getMember())
-                    .sendMessageEmbeds(embedBuilder.build())
-                    .setActionRow(Button.success("delete-ticket", "Delete Application"))
+            TextChannel channel = createTicket(guild, role, event.getMember());
+            channel.sendMessageEmbeds(embedBuilder.build())
+                    .setActionRow(Button.danger("delete-ticket", "Delete Application"))
                     .queue();
+            event.reply("Your application was created at " + channel.getAsMention() + "!").setEphemeral(true).queue();
         } else if (event.getModalId().equals("ticket")) {
             EmbedBuilder embedBuilder = new EmbedBuilder()
                     .setTitle("Ticket: " + event.getValue("subject").getAsString())
@@ -127,10 +128,11 @@ public class TicketCreation extends ListenerAdapter {
                     .setColor(Color.decode("#2B2D31"))
                     .addField("Description", event.getValue("description").getAsString(), false);
 
-            createTicket(guild, "ticket", event.getMember())
-                    .sendMessageEmbeds(embedBuilder.build())
-                    .setActionRow(Button.success("delete-ticket", "Delete Ticket"))
+            TextChannel channel = createTicket(guild, "ticket", event.getMember());
+            channel.sendMessageEmbeds(embedBuilder.build())
+                    .setActionRow(Button.danger("delete-ticket", "Delete Ticket"))
                     .queue();
+            event.reply("Your ticket was created at " + channel.getAsMention() + "!").setEphemeral(true).queue();
         }
     }
 
