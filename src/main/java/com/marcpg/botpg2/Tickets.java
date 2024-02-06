@@ -4,7 +4,7 @@ import com.marcpg.text.Formatter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -116,7 +116,7 @@ public class Tickets extends ListenerAdapter {
                     .addField("Experience", event.getValue("experience").getAsString(), false)
                     .addField("Why you?", event.getValue("why").getAsString(), false);
 
-            TextChannel channel = createTicket(guild, role, event.getMember());
+            TextChannel channel = createTicket(guild, role, event.getUser());
             channel.sendMessageEmbeds(embedBuilder.build())
                     .setActionRow(Button.danger("delete-ticket", "Delete Application"))
                     .queue();
@@ -128,7 +128,7 @@ public class Tickets extends ListenerAdapter {
                     .setColor(Color.decode("#2B2D31"))
                     .addField("Description", event.getValue("description").getAsString(), false);
 
-            TextChannel channel = createTicket(guild, "ticket", event.getMember());
+            TextChannel channel = createTicket(guild, "ticket", event.getUser());
             channel.sendMessageEmbeds(embedBuilder.build())
                     .setActionRow(Button.danger("delete-ticket", "Delete Ticket"))
                     .queue();
@@ -136,10 +136,10 @@ public class Tickets extends ListenerAdapter {
         }
     }
 
-    private TextChannel createTicket(@NotNull Guild guild, String name, @NotNull Member member) {
-        return guild.createTextChannel(name + "-" + member.getEffectiveName(), guild.getCategoryById(guild.getId().equals(Config.PEGOS_ID) ? Config.PEGOS_TICKET_CATEGORY : Config.HECTUS_TICKET_CATEGORY))
+    private TextChannel createTicket(@NotNull Guild guild, String name, @NotNull User user) {
+        return guild.createTextChannel(name + "-" + user.getName(), guild.getCategoryById(guild.getId().equals(Config.PEGOS_ID) ? Config.PEGOS_TICKET_CATEGORY : Config.HECTUS_TICKET_CATEGORY))
                 .syncPermissionOverrides()
-                .addMemberPermissionOverride(member.getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), List.of())
+                .addMemberPermissionOverride(user.getIdLong(), EnumSet.of(Permission.VIEW_CHANNEL), List.of())
                 .complete();
     }
 }

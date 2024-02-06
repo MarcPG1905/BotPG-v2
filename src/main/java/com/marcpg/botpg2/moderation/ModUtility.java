@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-public class SlashModUtil extends ListenerAdapter {
+public class ModUtility extends ListenerAdapter {
     public static final List<String> COMMANDS = List.of("kick", "ban", "pardon", "timeout", "un-timeout");
 
     @Override
@@ -26,8 +26,10 @@ public class SlashModUtil extends ListenerAdapter {
             event.reply("This command can only be used on servers!").setEphemeral(true).queue();
             return;
         }
-
         Guild guild = Objects.requireNonNull(event.getGuild());
+
+        Warning.updateWarns();
+
         Member member = Objects.requireNonNull(event.getMember());
         String reason = Objects.requireNonNull(event.getOption("reason")).getAsString();
 

@@ -7,32 +7,35 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.postgresql.util.PGTimestamp;
 
 import java.awt.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.List;
-import java.util.*;
+import java.util.Date;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class SlashWarn extends ListenerAdapter {
+public class Warning extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getName().equals("warn")) {
             if (!event.isFromGuild()) return;
             Guild guild = Objects.requireNonNull(event.getGuild());
 
+            updateWarns();
+
             User user = Objects.requireNonNull(event.getOption("member")).getAsUser();
             String reason = Objects.requireNonNull(event.getOption("reason")).getAsString();
             int level = Objects.requireNonNull(event.getOption("level")).getAsInt();
-
-            updateWarns(user);
-
             Date end = Date.from(Instant.ofEpochSecond(Instant.now().getEpochSecond() + Time.Unit.MONTHS.sec));
+
             UserStuff.WARN_DATABASE.add(UUID.randomUUID(), UserStuff.snowflakeToUuid(user.getIdLong()), UserStuff.snowflakeToUuid(event.getUser().getIdLong()), reason, level, PGTimestamp.from(end.toInstant()));
 
             int totalWarns = UserStuff.WARN_DATABASE.getRowArraysContaining(UserStuff.snowflakeToUuid(user.getIdLong()), "warned").stream()
@@ -45,8 +48,9 @@ public class SlashWarn extends ListenerAdapter {
                             .setTitle("You got warned on " + guild.getName() + "!")
                             .setDescription("You just got warned by " + event.getUser().getEffectiveName() + ". Read more below.")
                             .setColor(Color.ORANGE)
-                            .addField("Level", level + "/8", true)
                             .addField("Warned By", event.getUser().getEffectiveName(), true)
+                            .addField("Level", level + "/5", true)
+                            .addField("Total Level", totalWarns + "/8", true)
                             .addField("Reason", reason, false)
                             .build()
                     ).queue();
@@ -85,26 +89,18 @@ public class SlashWarn extends ListenerAdapter {
         }
     }
 
-    public static void updateWarns(@NotNull User user) {
+    public static void updateWarns() {
         Timestamp currentTime = Timestamp.from(Instant.now());
-        for (Object[] row : UserStuff.WARN_DATABASE.getRowArraysContaining(UserStuff.snowflakeToUuid(user.getIdLong()))) {
-            if (currentTime.after((PGTimestamp) row[5])) {
-                UserStuff.WARN_DATABASE.remove((UUID) row[0]);
+        String sql = "SELECT uuid, expiration FROM " + UserStuff.WARN_DATABASE.table();
+        try (PreparedStatement statement = UserStuff.WARN_DATABASE.connection().prepareStatement(sql)) {
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    if (currentTime.after(resultSet.getObject("expiration", PGTimestamp.class)))
+                        UserStuff.WARN_DATABASE.remove(resultSet.getObject("uuid", UUID.class));
+                }
             }
-        }
-    }
-
-    public record Warn(String userId, String warnerId, String reason, int level, Date ends) {
-        @NotNull
-        public String format() {
-            return userId + " |+| " + warnerId + " |+| " + reason + " |+| " + level + " |+| " + ends.toInstant().getEpochSecond();
-        }
-
-        @NotNull
-        @Contract("_ -> new")
-        public static Warn parse(@NotNull String input) {
-            String[] values = input.split(" \\|\\+\\| ");
-            return new Warn(values[0], values[1], values[2], Integer.parseInt(values[3]), Date.from(Instant.ofEpochSecond(Long.parseLong(values[4]))));
+        } catch (SQLException e) {
+            System.out.println("Couldn't update all user warns : " + e.getMessage());
         }
     }
 }
