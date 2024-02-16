@@ -1,9 +1,10 @@
 package com.marcpg.botpg2;
 
+import com.marcpg.data.database.sql.AutoCatchingSQLConnection;
+import com.marcpg.data.database.sql.SQLConnection;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import net.hectus.sql.AutoCatchingPostgreConnection;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,29 +18,29 @@ public class UserStuff {
     public static final Random RANDOM = new Random();
     public static final HashMap<Long, Message> LAST_MESSAGES = new HashMap<>();
 
-    public static AutoCatchingPostgreConnection DATABASE;
-    public static AutoCatchingPostgreConnection WARN_DATABASE;
+    public static AutoCatchingSQLConnection DATABASE;
+    public static AutoCatchingSQLConnection WARN_DATABASE;
     /*
-    ========================================== USERDATA ==========================================
-    |  Column | uuid        | messages_sent | level   | level_xp | total_xp | voice_chat_seconds |
-    +---------+-------------+---------------+---------+----------+----------+--------------------+
-    |    Type | UUID        | INTEGER       | INTEGER | INTEGER  | INTEGER  | BIGINT             |
-    | Default | PRIMARY KEY | 0             | 0       | 0        | 0        | 0                  |
-    |   Index | 0           | 1             | 2       | 3        | 4        | 5                  |
-    ==============================================================================================
+    ========================================= USERDATA =========================================
+    |  Column | uuid        | messages_sent | level | level_xp | total_xp | voice_chat_seconds |
+    +---------+-------------+---------------+-------+----------+----------+--------------------+
+    |    Type | UUID        | INT           | INT   | INT      | INT      | BIGINT             |
+    | Default | PRIMARY KEY | 0             | 0     | 0        | 0        | 0                  |
+    |   Index | 0           | 1             | 2     | 3        | 4        | 5                  |
+    ============================================================================================
 
     ====================================== WARNS ======================================
     |  Column | uuid        | warned   | warner   | reason   | level    | ending_time |
     +---------+-------------+----------+----------+----------+----------+-------------+
-    |    Type | UUID        | UUID     | UUID     | TEXT     | INTEGER  | TIMESTAMP   |
+    |    Type | UUID        | UUID     | UUID     | TEXT     | INT      | TIMESTAMP   |
     | Default | PRIMARY KEY | NOT NULL | NOT NULL | NOT NULL | NOT NULL | NOT NULL    |
     |   Index | 0           | 1        | 2        | 3        | 4        | 5           |
     ===================================================================================
      */
 
-    public static void load() throws SQLException {
-        DATABASE = new AutoCatchingPostgreConnection(Config.PSQL_URL, Config.PSQL_USER, Config.PSQL_PASSWD, "discord_userdata", e -> System.out.println("Couldn't interact with userdata database : " + e.getMessage()));
-        WARN_DATABASE = new AutoCatchingPostgreConnection(Config.PSQL_URL, Config.PSQL_USER, Config.PSQL_PASSWD, "discord_warns", e -> System.out.println("Couldn't interact with warn database : " + e.getMessage()));
+    public static void load() throws SQLException, ClassNotFoundException {
+        DATABASE = new AutoCatchingSQLConnection(SQLConnection.DatabaseType.POSTGRESQL, Config.PSQL_URL, Config.PSQL_USER, Config.PSQL_PASSWD, "userdata", e -> System.out.println("Couldn't interact with userdata database : " + e.getMessage()));
+        WARN_DATABASE = new AutoCatchingSQLConnection(SQLConnection.DatabaseType.POSTGRESQL, Config.PSQL_URL, Config.PSQL_USER, Config.PSQL_PASSWD, "warns", e -> System.out.println("Couldn't interact with warn database : " + e.getMessage()));
     }
 
     @Contract(value = "_ -> new", pure = true)
@@ -77,9 +78,7 @@ public class UserStuff {
                     messageContents.add(content);
                 }
             }
-
-            if (xp > 20) xp = 20;
-            addXP(xp, uuid, message);
+            addXP(Math.min(xp, 20), uuid, message);
         }
     }
 

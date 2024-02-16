@@ -15,6 +15,10 @@ public class Config {
     public static String HECTUS_MODS_ONLY;
     public static String HECTUS_TICKET_CATEGORY;
 
+    public static String SPELLBOUND_ID;
+    public static String SPELLBOUND_MODS_ONLY;
+    public static String SPELLBOUND_TICKET_CATEGORY;
+
     public static String PSQL_URL;
     public static String PSQL_USER;
     public static String PSQL_PASSWD;
@@ -40,6 +44,11 @@ public class Config {
         HECTUS_ID = properties.getProperty("hectus.id");
         HECTUS_MODS_ONLY = properties.getProperty("hectus.mods-only");
         HECTUS_TICKET_CATEGORY = properties.getProperty("hectus.ticket-category");
+
+        // Spellbound related configuration
+        SPELLBOUND_ID = properties.getProperty("spellbound.id");
+        SPELLBOUND_MODS_ONLY = properties.getProperty("spellbound.mods-only");
+        SPELLBOUND_TICKET_CATEGORY = properties.getProperty("spellbound.ticket-category");
 
         // Database related configuration
         PSQL_URL = properties.getProperty("psql.url");

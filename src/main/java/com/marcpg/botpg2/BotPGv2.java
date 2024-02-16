@@ -34,7 +34,7 @@ public class BotPGv2 {
         try {
             UserStuff.load();
             System.out.println(Ansi.formattedString("Loaded user data and warnings!", Ansi.GREEN));
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }

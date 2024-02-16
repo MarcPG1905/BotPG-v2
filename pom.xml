@@ -6,13 +6,47 @@
 
     <groupId>com.marcpg</groupId>
     <artifactId>BotPGv2</artifactId>
-    <version>0.4.3-BETA</version>
+    <version>0.4.4-BETA</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>marcpg-repo</id>
+            <url>https://marcpg.com/repo/</url>
+        </repository>
+        <repository>
+            <id>sonatype</id>
+            <url>https://repository.sonatype.org/content/groups/public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.dv8tion</groupId>
+            <artifactId>JDA</artifactId>
+            <version>5.0.0-beta.20</version>
+        </dependency>
+        <dependency>
+            <groupId>com.marcpg</groupId>
+            <artifactId>libpg</artifactId>
+            <version>0.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.36</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -60,27 +94,4 @@
             </resource>
         </resources>
     </build>
-
-    <dependencies>
-        <dependency>
-            <groupId>net.dv8tion</groupId>
-            <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.20</version>
-        </dependency>
-        <dependency>
-            <groupId>com.marcpg</groupId>
-            <artifactId>libpg</artifactId>
-            <version>0.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>net.hectus</groupId>
-            <artifactId>HectusUtilities</artifactId>
-            <version>0.3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-nop</artifactId>
-            <version>1.7.36</version>
-        </dependency>
-    </dependencies>
 </project>
