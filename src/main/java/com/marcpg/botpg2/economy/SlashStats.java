@@ -51,15 +51,15 @@ public class SlashStats extends ListenerAdapter {
         } else {
             EmbedBuilder builder = new EmbedBuilder()
                     .setAuthor(member.getEffectiveName(), null, member.getEffectiveAvatarUrl())
-                    .setColor(Color.YELLOW)
+                    .setColor(Color.ORANGE)
                     .setTitle(member.getEffectiveName() + "'s Warnings");
 
             Warning.getWarns(member.getIdLong()).forEach(warn -> {
                 User byUser = BotPGv2.JDA.getUserById(((UUID) warn[2]).getMostSignificantBits());
                 String by = (byUser == null ? "Unknown" : byUser.getAsMention());
                 long expires = ((Timestamp) warn[5]).toInstant().getEpochSecond();
-                builder.addField("<t:" + (expires - Time.Unit.MONTHS.sec) + ":R>:", "**Level:** " + warn[4] + "\n**Reason: **" + warn[3] + "\n**By:** " + by + "\n**Expires:** <t:" + expires + ":R>\n**Warn-UUID**: `" + warn[0].toString() + "`\n ", false);
                 builder.addBlankField(false);
+                builder.addField("<t:" + (expires - Time.Unit.MONTHS.sec) + ">:", "**Level:** " + warn[4] + "\n**Reason: **" + warn[3] + "\n**By:** " + by + "\n**Expires:** <t:" + expires + ":R>\n**Warn-UUID**: `" + warn[0].toString() + "`", false);
             });
 
             event.replyEmbeds(builder.build()).queue();
