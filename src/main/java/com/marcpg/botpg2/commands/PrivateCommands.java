@@ -1,10 +1,8 @@
 package com.marcpg.botpg2.commands;
 
-import com.marcpg.botpg2.BotPGv2;
 import com.marcpg.botpg2.UserStuff;
 import com.marcpg.color.Ansi;
 import com.marcpg.storing.Pair;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
@@ -27,15 +25,7 @@ public class PrivateCommands extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
-        if (event.getName().equals("stop-botpg")) {
-            if (event.getUser().getIdLong() != 1010644129220415608L) {
-                event.reply("Only MarcPG can use this command!").setEphemeral(true).queue();
-                return;
-            }
-
-            event.reply("Shutting down and saving user data!").setEphemeral(true).queue();
-            BotPGv2.JDA.shutdown();
-        } else if (event.getName().equals("load-messages")) {
+        if (event.getName().equals("load-messages")) {
             event.deferReply(true).queue();
             try {
                 List<GuildMessageChannel> channels = new ArrayList<>();

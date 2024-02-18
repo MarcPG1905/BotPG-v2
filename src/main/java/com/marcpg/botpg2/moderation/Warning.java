@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -38,9 +39,7 @@ public class Warning extends ListenerAdapter {
 
             UserStuff.WARN_DATABASE.add(UUID.randomUUID(), UserStuff.snowflakeToUuid(user.getIdLong()), UserStuff.snowflakeToUuid(event.getUser().getIdLong()), reason, level, PGTimestamp.from(end.toInstant()));
 
-            int totalWarns = UserStuff.WARN_DATABASE.getRowArraysContaining(UserStuff.snowflakeToUuid(user.getIdLong()), "warned").stream()
-                    .mapToInt(row -> (Integer) row[4])
-                    .sum();
+            int totalWarns = getWarns(user.getIdLong()).stream().mapToInt(row -> (Integer) row[4]).sum();
 
             if (user.hasPrivateChannel()) {
                 user.openPrivateChannel().queue(privateChannel -> {
@@ -91,16 +90,20 @@ public class Warning extends ListenerAdapter {
 
     public static void updateWarns() {
         Timestamp currentTime = Timestamp.from(Instant.now());
-        String sql = "SELECT uuid, expiration FROM " + UserStuff.WARN_DATABASE.table();
+        String sql = "SELECT uuid, ending_time FROM " + UserStuff.WARN_DATABASE.table();
         try (PreparedStatement statement = UserStuff.WARN_DATABASE.connection().prepareStatement(sql)) {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    if (currentTime.after(resultSet.getObject("expiration", PGTimestamp.class)))
+                    if (currentTime.after(resultSet.getObject("ending_time", PGTimestamp.class)))
                         UserStuff.WARN_DATABASE.remove(resultSet.getObject("uuid", UUID.class));
                 }
             }
         } catch (SQLException e) {
             System.out.println("Couldn't update all user warns : " + e.getMessage());
         }
+    }
+
+    public static List<Object[]> getWarns(long userId) {
+        return UserStuff.WARN_DATABASE.getRowArraysContaining(UserStuff.snowflakeToUuid(userId), "warned");
     }
 }
