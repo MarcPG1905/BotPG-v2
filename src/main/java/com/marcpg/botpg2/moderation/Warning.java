@@ -16,10 +16,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Date;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +35,13 @@ public class Warning extends ListenerAdapter {
             int level = Objects.requireNonNull(event.getOption("level")).getAsInt();
             Date end = Date.from(Instant.ofEpochSecond(Instant.now().getEpochSecond() + Time.Unit.MONTHS.sec));
 
-            UserStuff.WARN_DATABASE.add(UUID.randomUUID(), UserStuff.snowflakeToUuid(user.getIdLong()), UserStuff.snowflakeToUuid(event.getUser().getIdLong()), reason, level, PGTimestamp.from(end.toInstant()));
+            UserStuff.WARN_DATABASE.add(Map.of(
+                    "uuid" + UUID.randomUUID(),
+                    "warned" + user.getIdLong(),
+                    "warner" + event.getUser().getIdLong(),
+                    "reason" + reason,
+                    "level" + level,
+                    "ending_time" + PGTimestamp.from(end.toInstant())));
 
             int totalWarns = getWarns(user.getIdLong()).stream().mapToInt(row -> (Integer) row[4]).sum();
 
@@ -104,6 +108,6 @@ public class Warning extends ListenerAdapter {
     }
 
     public static List<Object[]> getWarns(long userId) {
-        return UserStuff.WARN_DATABASE.getRowArraysContaining(UserStuff.snowflakeToUuid(userId), "warned");
+        return UserStuff.WARN_DATABASE.getRowArraysContaining(userId, "warned");
     }
 }

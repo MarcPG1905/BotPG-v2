@@ -6,7 +6,7 @@
 
     <groupId>com.marcpg</groupId>
     <artifactId>BotPGv2</artifactId>
-    <version>0.4.5-BETA</version>
+    <version>0.4.6-BETA</version>
 
     <properties>
         <java.version>21</java.version>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>com.marcpg</groupId>
             <artifactId>libpg</artifactId>
-            <version>0.0.6</version>
+            <version>0.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

@@ -22,16 +22,12 @@ public class SlashStats extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (!event.getName().contains("stats")) return;
-        if (!event.isFromGuild()) {
-            event.reply("This command can only be used in servers!").setEphemeral(true).queue();
-            return;
-        }
 
         OptionMapping option = event.getOption("user");
         Member member = Objects.requireNonNull(option != null ? option.getAsMember() : event.getMember());
 
         if (event.getName().equals("stats")) {
-            Map<String, Object> data = UserStuff.DATABASE.getRowMap(UserStuff.snowflakeToUuid(member.getIdLong()));
+            Map<String, Object> data = UserStuff.DATABASE.getRowMap(member.getIdLong());
             if (data.isEmpty()) {
                 event.reply("You need to send at least one message to use this command!").setEphemeral(true).queue();
                 return;
@@ -46,7 +42,7 @@ public class SlashStats extends ListenerAdapter {
                     .addField("Total XP", String.valueOf(data.get("total_xp")), true)
                     .addField("Messages", String.valueOf(data.get("messages_sent")), true)
                     .addField("Boosting", member.isBoosting() ? "Yes" : "No", true)
-                    .addField("Warns", Warning.getWarns(member.getIdLong()).stream().mapToInt(row -> (Integer) row[4]) + "/8", true);
+                    .addField("Warns", Warning.getWarns(member.getIdLong()).stream().mapToInt(row -> (Integer) row[4]).sum() + "/8", true);
             event.replyEmbeds(builder.build()).queue();
         } else {
             EmbedBuilder builder = new EmbedBuilder()

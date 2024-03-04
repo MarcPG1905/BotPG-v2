@@ -5,7 +5,6 @@ import com.marcpg.data.database.sql.SQLConnection;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -14,12 +13,13 @@ import java.util.List;
 import java.util.*;
 
 public class UserStuff {
-    public static final double l = 22000, k = 0.03, c = 21;
-    public static final Random RANDOM = new Random();
     public static final HashMap<Long, Message> LAST_MESSAGES = new HashMap<>();
 
-    public static AutoCatchingSQLConnection DATABASE;
-    public static AutoCatchingSQLConnection WARN_DATABASE;
+    private static final double l = 22000, k = 0.03, c = 21;
+    private static final Random RANDOM = new Random();
+
+    public static AutoCatchingSQLConnection<Long> DATABASE;
+    public static AutoCatchingSQLConnection<UUID> WARN_DATABASE;
     /*
     ========================================= USERDATA =========================================
     |  Column | uuid        | messages_sent | level | level_xp | total_xp | voice_chat_seconds |
@@ -39,25 +39,20 @@ public class UserStuff {
      */
 
     public static void load() throws SQLException, ClassNotFoundException {
-        DATABASE = new AutoCatchingSQLConnection(SQLConnection.DatabaseType.POSTGRESQL, Config.PSQL_URL, Config.PSQL_USER, Config.PSQL_PASSWD, "userdata", e -> System.out.println("Couldn't interact with userdata database : " + e.getMessage()));
-        WARN_DATABASE = new AutoCatchingSQLConnection(SQLConnection.DatabaseType.POSTGRESQL, Config.PSQL_URL, Config.PSQL_USER, Config.PSQL_PASSWD, "warns", e -> System.out.println("Couldn't interact with warn database : " + e.getMessage()));
-    }
-
-    @Contract(value = "_ -> new", pure = true)
-    public static @NotNull UUID snowflakeToUuid(long snowflake) {
-        return new UUID(snowflake, 0);
+        DATABASE = new AutoCatchingSQLConnection<>(SQLConnection.DatabaseType.POSTGRESQL, Config.PSQL_URL, Config.PSQL_USER, Config.PSQL_PASSWD, "userdata", "user_id", e -> System.out.println("Couldn't interact with userdata database : " + e.getMessage()));
+        WARN_DATABASE = new AutoCatchingSQLConnection<>(SQLConnection.DatabaseType.POSTGRESQL, Config.PSQL_URL, Config.PSQL_USER, Config.PSQL_PASSWD, "warns", "uuid", e -> System.out.println("Couldn't interact with warn database : " + e.getMessage()));
     }
 
     public static int xpCalc(int level) {
         return (int) (l / (c * Math.pow(Math.E, (-k * level)) + 1));
     }
 
-    public static void sentMessage(UUID uuid, @NotNull Message message) {
-        System.out.println(message.getAuthor().getName() + " sent a message!");
+    public static void sentMessage(@NotNull Message message) {
+        System.out.println(message.getAuthor().getName() + " sent a message in \"" + message.getGuild().getName() + "\" -> #" + message.getChannel().getName());
 
         User user = message.getAuthor();
 
-        DATABASE.set(uuid, "messages_sent", (Integer) DATABASE.get(uuid, "messages_sent") + 1);
+        DATABASE.set(user.getIdLong(), "messages_sent", (Integer) DATABASE.get(user.getIdLong(), "messages_sent") + 1);
 
         if (!message.isFromGuild() || user.isBot() || user.isSystem() || message.isWebhookMessage()) return;
 
@@ -78,26 +73,28 @@ public class UserStuff {
                     messageContents.add(content);
                 }
             }
-            addXP(Math.min(xp, 20), uuid, message);
+            addXP(Math.min(xp, 20), message);
         }
     }
 
-    public static void addXP(int amount, UUID uuid, Message message) {
-        DATABASE.set(uuid, "total_xp", (Integer) DATABASE.get(uuid, "total_xp") + amount);
-        DATABASE.set(uuid, "level_xp", (Integer) DATABASE.get(uuid, "level_xp") + amount);
+    private static void addXP(int amount, @NotNull Message message) {
+        long userId = message.getAuthor().getIdLong();
 
-        int requiredXp = xpCalc((Integer) DATABASE.get(uuid, "level"));
+        DATABASE.set(userId, "total_xp", (Integer) DATABASE.get(userId, "total_xp") + amount);
+        DATABASE.set(userId, "level_xp", (Integer) DATABASE.get(userId, "level_xp") + amount);
 
-        if ((Integer) DATABASE.get(uuid, "level_xp") >= requiredXp) {
-            DATABASE.set(uuid, "level_xp", (Integer) DATABASE.get(uuid, "level_xp") - requiredXp);
-            DATABASE.set(uuid, "level", (Integer) DATABASE.get(uuid, "level") + 1);
+        int requiredXp = xpCalc((Integer) DATABASE.get(userId, "level"));
 
-            if ((Integer) DATABASE.get(uuid, "level") % 5 == 0) {
+        if ((Integer) DATABASE.get(userId, "level_xp") >= requiredXp) {
+            DATABASE.set(userId, "level_xp", (Integer) DATABASE.get(userId, "level_xp") - requiredXp);
+            DATABASE.set(userId, "level", (Integer) DATABASE.get(userId, "level") + 1);
+
+            if ((Integer) DATABASE.get(userId, "level") % 5 == 0) {
                 EmbedBuilder builder = new EmbedBuilder()
                         .setAuthor(message.getAuthor().getEffectiveName(), null, message.getAuthor().getEffectiveAvatarUrl())
                         .setColor(Color.GREEN)
                         .setTitle("Great job, " + message.getAuthor().getAsMention() + "!")
-                        .setDescription("You just reached level " + DATABASE.get(uuid, "level") + "!");
+                        .setDescription("You just reached level " + DATABASE.get(userId, "level") + "!");
                 message.replyEmbeds(builder.build()).queue();
             }
         }

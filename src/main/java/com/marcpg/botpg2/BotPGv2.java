@@ -2,6 +2,7 @@ package com.marcpg.botpg2;
 
 import com.marcpg.botpg2.commands.*;
 import com.marcpg.botpg2.economy.MessageEvent;
+import com.marcpg.botpg2.economy.SlashLeaderboard;
 import com.marcpg.botpg2.economy.SlashStats;
 import com.marcpg.botpg2.moderation.ChatClearing;
 import com.marcpg.botpg2.moderation.ModUtility;
@@ -24,7 +25,7 @@ public class BotPGv2 {
                 .addEventListeners(
                         new MessageEvent(), new PrivateCommands(), new SlashAvatar(), new ChatClearing(), new ModUtility(),
                         new SlashSocials(), new SlashSource(), new SlashStats(), new SlashTicketMsg(), new Warning(),
-                        new Tickets()
+                        new Tickets(), new SlashLeaderboard()
                 )
                 .disableCache(CacheFlag.VOICE_STATE, CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.SCHEDULED_EVENTS)
                 .build()

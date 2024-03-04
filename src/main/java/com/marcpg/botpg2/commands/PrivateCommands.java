@@ -73,7 +73,12 @@ public class PrivateCommands extends ListenerAdapter {
                     Pair<Integer, Integer> result = calculate(entry.getValue().right().get());
                     writer.write(String.format("%-22s%-7s%-10s%-10s%-10s", entry.getKey(), result.left(), result.right(), entry.getValue().right().get(), entry.getValue().left().get()));
                     writer.newLine();
-                    UserStuff.DATABASE.add(UserStuff.snowflakeToUuid(entry.getKey()), entry.getValue().left().get(), result.left(), result.right(), entry.getValue().right().get());
+                    UserStuff.DATABASE.add(Map.of(
+                            "user_id", entry.getKey(),
+                            "level", result.left(),
+                            "level_xp", result.right(),
+                            "total_xp", entry.getValue().right().get(),
+                            "messages_sent", entry.getValue().left().get()));
                 }
             } catch (IOException e) {
                 System.out.println(Ansi.formattedString("Couldn't save the processed result of the XP simulation to the file!", Ansi.RED));
